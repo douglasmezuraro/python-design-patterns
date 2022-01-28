@@ -1,3 +1,5 @@
+from typing import Any, Mapping, Iterable
+
 class Singleton(object):
 
     def __new__(cls):
@@ -17,3 +19,14 @@ class LazySingleton(object):
             cls.__instance = LazySingleton()
 
         return cls.__instance
+
+
+class MonoStateSingleton(object):
+
+    __state = {}
+
+    def __new__(cls, *args: Iterable[Any], **kwargs: Mapping[str, Any]):
+        obj = super(MonoStateSingleton, cls).__new__(cls, *args, **kwargs)
+        obj.__dict__ = cls.__state
+
+        return obj
