@@ -1,4 +1,5 @@
 from typing import Any, Mapping, Iterable
+from sqlite3 import Cursor, connect
 
 class Singleton(object):
 
@@ -43,5 +44,26 @@ class MetaClassSingleton(type):
         return cls.__instances[cls]
 
 
-class MetaClassSingletonExample(metaclass=MetaClassSingleton):
-    pass
+class DatabaseConnection(metaclass=MetaClassSingleton):
+
+    def __init__(self):
+        self.__connection = None
+        self.__cursor = None
+
+    def connect(self) -> Cursor:
+        if not self.__connection:
+            self.__connection = connect('example.db')
+            self.__cursor = self.__connection.cursor()
+
+        return self.__cursor
+
+
+if __name__ == '__main__':
+    assert(id(Singleton()) == id(Singleton()))
+    assert(id(LazySingleton.get_instance()) == id(LazySingleton.get_instance()))
+    assert(id(DatabaseConnection()) == id(DatabaseConnection()))
+
+    x, y = MonoStateSingleton(), MonoStateSingleton()
+    x.foo = 'bar'
+    assert(id(x) != id(y))
+    assert(x.__dict__ == y.__dict__)
